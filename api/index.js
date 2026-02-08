@@ -45,9 +45,9 @@ app.post('/api/upload', upload.single('video'), (req, res) => {
     };
 
     console.log('[*] Video uploaded:', videoData.filename);
-    
+
     // 분석 워커에게 알리는 로직 (Job Queue) 등이 여기에 위치함
-    
+
     res.json({
         message: 'Video uploaded successfully. Analysis starting...',
         video: videoData
@@ -58,12 +58,17 @@ app.get('/api/health', (req, res) => {
     res.json({ status: 'ok' });
 });
 
-// Start Server
-app.listen(PORT, () => {
-    console.log(`[+] API Server running on http://localhost:${PORT}`);
-    // Uploads 폴더가 없으면 생성
-    const fs = require('fs');
-    if (!fs.existsSync('uploads')) {
-        fs.mkdirSync('uploads');
-    }
-});
+// Export the app for Vercel Serverless Functions
+module.exports = app;
+
+// Start Server only if not running as a serverless function
+if (require.main === module) {
+    app.listen(PORT, () => {
+        console.log(`[+] API Server running on http://localhost:${PORT}`);
+        // Uploads 폴더가 없으면 생성
+        const fs = require('fs');
+        if (!fs.existsSync('uploads')) {
+            fs.mkdirSync('uploads');
+        }
+    });
+}
